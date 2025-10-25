@@ -1,0 +1,182 @@
+import java.util.Scanner;
+
+class Node {
+    int data;
+    Node left;
+    Node right;
+
+    public Node(int data) {
+        this.data = data;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+class BinaryTree {
+    private Node root;
+    private boolean allowDuplicates;
+
+    public BinaryTree(boolean allowDuplicates) {
+        this.root = null;
+        this.allowDuplicates = allowDuplicates;
+    }
+
+
+    public Node insertUnique(Node root, int data) {
+        if (root == null) {
+            return new Node(data);
+        }
+
+        if (data < root.data) {
+            root.left = insertUnique(root.left, data);
+        }
+        else if (data > root.data) {
+            root.right = insertUnique(root.right, data);
+        }
+
+
+        return root;
+    }
+
+
+    public Node insertWithDuplicates(Node root, int data) {
+        if (root == null) {
+            return new Node(data);
+        }
+
+        if (data < root.data) {
+            root.left = insertWithDuplicates(root.left, data);
+        } else {
+            root.right = insertWithDuplicates(root.right, data);
+        }
+
+
+        return root;
+    }
+
+
+    public boolean searchUnique(Node root, int key) {
+        if (root == null) return false;
+
+        if (root.data == key) return true;
+        else if (key < root.data)
+            return searchUnique(root.left, key);
+        else
+            return searchUnique(root.right, key);
+    }
+
+
+    public int countDuplicates(Node root, int key) {
+        if (root == null) return 0;
+
+        int count = 0;
+        if (root.data == key) count = 1;
+
+        count += countDuplicates(root.left, key);
+        count += countDuplicates(root.right, key);
+
+        return count;
+    }
+
+
+    public void insert(int data) {
+        if (allowDuplicates) {
+            root = insertWithDuplicates(root, data);
+        } else {
+            root = insertUnique(root, data);
+        }
+    }
+
+
+    public int searchCount(int key) {
+        if (allowDuplicates) {
+            return countDuplicates(root, key);
+        } else {
+            return searchUnique(root, key) ? 1 : 0;
+        }
+    }
+
+
+    public void printTree() {
+        printTree(root, 0);
+    }
+
+    private void printTree(Node root, int level) {
+        if (root == null) return;
+
+        printTree(root.right, level + 1);
+
+        for (int i = 0; i < level; i++)
+            System.out.print("   ");
+        System.out.println(root.data);
+
+        printTree(root.left, level + 1);
+    }
+
+
+    public void clear() {
+        root = null;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        BinaryTree tree = null;
+
+        while (true) {
+            System.out.println("Выберите режим:");
+            System.out.println("1 - БЕЗ повторений");
+            System.out.println("2 - С повторениями");
+            System.out.print("Ваш выбор: ");
+
+            int choice = scanner.nextInt();
+
+            if (choice == 1) {
+                tree = new BinaryTree(false);
+                System.out.println("Режим: БЕЗ повторений");
+                break;
+            } else if (choice == 2) {
+                tree = new BinaryTree(true);
+                System.out.println("Режим: С повторениями");
+                break;
+            } else {
+                System.out.println("Неверный выбор! Попробуйте снова.\n");
+            }
+        }
+
+        System.out.println("\nВведите числа (0 для окончания ввода):");
+        while (true) {
+            System.out.print("Число: ");
+            int data = scanner.nextInt();
+
+
+            if (data == 0) break;
+            if (data < 0) {
+                System.out.println("Отрицательные числа не допускаются!");
+                continue;
+            }
+            if (data > 10000) {
+                System.out.println("Вы вышли за диапазон");
+
+                continue;
+            }
+
+            tree.insert(data);
+        }
+
+        System.out.println("\nДерево:");
+        tree.printTree();
+
+        System.out.print("\nВведите число для поиска: ");
+        int searchKey = scanner.nextInt();
+
+        int count = tree.searchCount(searchKey);
+        if (count > 0) {
+            System.out.printf("Число %d найдено! Встречается %d раз(а)\n", searchKey, count);
+        } else {
+            System.out.printf("Число %d не найдено\n", searchKey);
+        }
+
+        tree.clear();
+        scanner.close();
+    }
+}
